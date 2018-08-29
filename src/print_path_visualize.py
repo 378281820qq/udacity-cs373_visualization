@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+
+#------------------------------------To-Do--------------------------------------------#
+#1. separate print path process and drawing process
+#2. TBD
+#-------------------------------------------------------------------------------------#
 import rospy
 import sys
 import math
-import time
 from std_msgs.msg import String
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
@@ -15,16 +19,16 @@ class print_path():
         #--------------------------------Parameter Setup-------------------------------#
         #initialize map
         self.init = [0, 0]
-        self.grid = [[0, 0, 1, 0, 1, 0],
-                    [0, 0, 0, 0, 1, 0],
-                    [0, 0, 1, 0, 1, 0],
-                    [0, 0, 0, 0, 1, 0],
-                    [0, 0, 0, 0, 1, 0],
-                    [0, 0, 1, 0, 1, 0],
+        self.grid = [[0, 0, 1, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 0]]
+                    [0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0]]
         self.goal = [len(self.grid)-1, len(self.grid[0])-1] 
         #initialize condition
         self.cost = 1
@@ -87,7 +91,7 @@ class print_path():
             y = self.next[2]
             self.value = self.next[0]
             print 'current postion:', x, ', ',y
-            self.set_color(self.xy_to_id(x, y), 230, 172, 0)
+            
 
             if x == self.goal[0] and y == self.goal[1]:
                 self.is_get_goal = True
@@ -104,7 +108,10 @@ class print_path():
                             self.openlist.append([g2, x2, y2])
                             self.closed[x2][y2] = 1
                             self.walkthrough[x][y] = self.directions_name[i]
-                            self.set_color(self.xy_to_id(x,y), 230, 115, 0)
+                            self.set_color(self.xy_to_id(x2,y2), 230, 172, 0 )
+                            self.publisher.publish(self.marker_array)
+                self.set_color(self.xy_to_id(x, y), 230, 115, 0)
+                self.publisher.publish(self.marker_array)
 
     def backpropagation(self):
         '''
@@ -151,8 +158,9 @@ def main(args):
     rospy.init_node('path_handler', anonymous=True)
     map = print_path()
 
-    rate = rospy.Rate(5)
-    while (not map.is_get_goal) and (not map.no_path_to_go):
+    #d = rospy.Duration(0.5, 0)
+    r = rospy.Rate(5) #Hz
+    while (not rospy.is_shutdown()) and (not map.is_get_goal) and (not map.no_path_to_go):
         map.iteration()
         if map.is_get_goal:
             print "-----------------------ready to print path-----------------------------"
@@ -164,11 +172,13 @@ def main(args):
             rospy.logerr("5555555555555555555555555")
         else:
             map.draw()
-            time.sleep(0.2)
-    rate.sleep()
+        #rospy.sleep(d)
+        r.sleep()
 
+#can be used as class by import
 if __name__ == '__main__':
     try:
         main(sys.argv)
+    #terminate program when using ctrl+c or close node
     except rospy.ROSInterruptException:
         pass
