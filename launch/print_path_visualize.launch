@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+   <node pkg="cs373_visualization" type="print_path_visualize.py" name="path_handler" output="screen"/>
+   <node pkg="rviz" type="rviz" name="rviz"/>
+
+</launch>
