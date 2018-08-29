@@ -18,6 +18,11 @@ class print_path():
         self.grid = [[0, 0, 1, 0, 1, 0],
                     [0, 0, 0, 0, 1, 0],
                     [0, 0, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 1, 0],
+                    [0, 0, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 1, 0]]
         self.goal = [len(self.grid)-1, len(self.grid[0])-1] 
@@ -57,13 +62,13 @@ class print_path():
                 marker.color.a = 1.0 #1.0 -> complete not transparent 0.0-> complete transparent
                 #set different color for available path and obstacle
                 if self.grid[i][j] == 1:
+                    marker.color.r = 0 / 255.0
+                    marker.color.g = 0 / 255.0
+                    marker.color.b = 0 / 255.0
+                elif self.grid[i][j] == 0:
                     marker.color.r = 255 / 255.0
                     marker.color.g = 255 / 255.0
-                    marker.color.b = 255 / 255.0
-                elif self.grid[i][j] == 0:
-                    marker.color.r = 204 / 255.0
-                    marker.color.g = 163 / 255.0
-                    marker.color.b = 0 / 255.0
+                    marker.color.b = 204 / 255.0
                 self.marker_array.markers.append(marker)
         
         self.publisher.publish(self.marker_array)
@@ -82,9 +87,11 @@ class print_path():
             y = self.next[2]
             self.value = self.next[0]
             print 'current postion:', x, ', ',y
+            self.set_color(self.xy_to_id(x, y), 230, 172, 0)
 
             if x == self.goal[0] and y == self.goal[1]:
-                self.is_get_goal = True    
+                self.is_get_goal = True
+                self.expand[x][y] = '*'    
                 rospy.loginfo("ARRIVE GOAL")
                 return 
             else:
@@ -97,6 +104,7 @@ class print_path():
                             self.openlist.append([g2, x2, y2])
                             self.closed[x2][y2] = 1
                             self.walkthrough[x][y] = self.directions_name[i]
+                            self.set_color(self.xy_to_id(x,y), 230, 115, 0)
 
     def backpropagation(self):
         '''
@@ -112,8 +120,11 @@ class print_path():
                 direction = self.directions_name.index(here)
                 x += self.directions[direction][0]
                 y += self.directions[direction][1]
+                self.set_color(self.xy_to_id(x, y), 64, 255, 0)            
             count += 1
-        self.expand[self.goal[0]][self.goal[1]] == '*'
+
+        self.set_color(self.xy_to_id(self.init[0], self.init[1]), 64, 255, 0)
+        self.publisher.publish(self.marker_array)
         return 
     #------------------------------Visualization Helper Function-------------------------------#
     def set_color(self, id, r, g, b):
@@ -136,22 +147,28 @@ class print_path():
 
         self.publisher.publish(self.marker_array)
 
+def main(args):
+    rospy.init_node('path_handler', anonymous=True)
+    map = print_path()
 
-rospy.init_node('path_handler', anonymous=True)
-map = print_path()
+    rate = rospy.Rate(5)
+    while (not map.is_get_goal) and (not map.no_path_to_go):
+        map.iteration()
+        if map.is_get_goal:
+            print "-----------------------ready to print path-----------------------------"
+            map.backpropagation()
+            rospy.loginfo("PRINT OUT THE PATH IN LOG")
+            for i in range(len(map.expand)):
+                print map.expand[i]
+        elif map.no_path_to_go:
+            rospy.logerr("5555555555555555555555555")
+        else:
+            map.draw()
+            time.sleep(0.2)
+    rate.sleep()
 
-rate = rospy.Rate(5)
-while (not map.is_get_goal) and (not map.no_path_to_go):
-    map.iteration()
-    if map.is_get_goal:
-        print "-----------------------ready to print path-----------------------------"
-        map.backpropagation()
-        rospy.loginfo("PRINT OUT THE PATH IN LOG")
-        for i in range(len(map.expand)):
-            print map.expand[i]
-    elif map.no_path_to_go:
-        rospy.logerr("5555555555555555555555555")
-    else:
-        map.draw()
-        time.sleep(0.5)
-rate.sleep()
+if __name__ == '__main__':
+    try:
+        main(sys.argv)
+    except rospy.ROSInterruptException:
+        pass
