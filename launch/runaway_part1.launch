@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<launch>
+   <node pkg="cs373_visualization" type="runaway_robot.py" name="runaway_robot" output="screen"/>
+   <node pkg="cs373_visualization" type="estimator.py" name="estimator_robot" output="screen"/>
+   <node pkg="rviz" type="rviz" name="rviz"/>
+
+</launch>
