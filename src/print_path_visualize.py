@@ -169,7 +169,7 @@ def main(args):
             for i in range(len(map.expand)):
                 print map.expand[i]
         elif map.no_path_to_go:
-            rospy.logerr("5555555555555555555555555")
+            rospy.logerr("UNABLE TO FIND A PATH)
         else:
             map.draw()
         #rospy.sleep(d)
