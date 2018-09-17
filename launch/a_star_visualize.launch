@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<launch>
+   <node pkg="cs373_visualization" type="a_star_visualize.py" name="a_star" output="screen"/>
+   <node pkg="rviz" type="rviz" name="rviz"/>
+</launch>

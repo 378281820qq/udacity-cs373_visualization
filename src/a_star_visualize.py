@@ -19,19 +19,21 @@ class print_path():
         #--------------------------------Parameter Setup-------------------------------#
         #initialize map
         self.init = [0, 0]
-        self.grid = [[0, 0, 1, 0, 0, 0],
+        self.grid = [[0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1],
                     [0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 0, 0],
                     [0, 0, 0, 0, 0, 0]]
+        self.heuristic = [[10, 9, 8, 7, 6, 5],
+                          [9, 8, 7, 6, 5, 4],
+                          [8, 7, 6, 5, 4, 3],
+                          [7, 6, 5, 4, 3, 2],
+                          [6, 5, 4, 3, 2, 1],
+                          [5, 4, 3, 2, 1, 0]]
         self.goal = [len(self.grid)-1, len(self.grid[0])-1] 
         #initialize condition
-        self.cost = 1
+        self.count = 0
         self.is_get_goal = False
         self.no_path_to_go = False
         self.directions = [[-1, 0], # go up
@@ -43,8 +45,9 @@ class print_path():
         self.openlist = []
         self.openlist.append([0, self.init[0], self.init[1]])
         self.closed = [[0 for row in range(len(self.grid[0]))] for col in range(len(self.grid))]
-        self.walkthrough = [[' ' for row in range(len(self.grid[0]))] for col in range(len(self.grid))]
-        self.expand = [[' ' for row in range(len(self.grid[0]))] for col in range(len(self.grid))]
+        self.walkthrough = [[('x','x') for row in range(len(self.grid[0]))] for col in range(len(self.grid))]
+        self.record = [[' ' for row in range(len(self.grid[0]))] for col in range(len(self.grid))]
+        self.expand = [[-1 for row in range(len(self.grid[0]))] for col in range(len(self.grid))]
         self.closed[self.init[0]][self.init[1]] = 1
 
         #--------------------------------Begin Plot-------------------------------# 
@@ -89,14 +92,15 @@ class print_path():
 
             x = self.next[1]
             y = self.next[2]
-            self.value = self.next[0]
+            self.expand[x][y] = self.count
+            self.count += 1
             print 'current postion:', x, ', ',y
             
 
             if x == self.goal[0] and y == self.goal[1]:
-                self.is_get_goal = True
-                self.expand[x][y] = '*'    
+                self.is_get_goal = True  
                 rospy.loginfo("ARRIVE GOAL")
+                self.record[x][y] = '*'
                 return 
             else:
                 for i in range(len(self.directions)):
@@ -104,10 +108,11 @@ class print_path():
                     y2 = y + self.directions[i][1]
                     if x2 >= 0 and x2 < len(self.grid) and y2 >=0 and y2 < len(self.grid[0]):
                         if self.closed[x2][y2] == 0 and self.grid[x2][y2] == 0:
-                            g2 = self.value + self.cost
+                            g2 = self.expand[x2][y2] + self.heuristic[x2][y2]
                             self.openlist.append([g2, x2, y2])
                             self.closed[x2][y2] = 1
-                            self.walkthrough[x][y] = self.directions_name[i]
+                            self.record[x][y] = '*'
+                            self.walkthrough[x2][y2] = (x, y)
                             self.set_color(self.xy_to_id(x2,y2), 230, 172, 0 )
                             self.publisher.publish(self.marker_array)
                 self.set_color(self.xy_to_id(x, y), 230, 115, 0)
@@ -117,19 +122,15 @@ class print_path():
         '''
         iterate back to get directions
         '''
-        x = 0
-        y = 0
-        count = 0
-        while count < self.value:
-            self.expand[x][y] = self.walkthrough[x][y]
-            here = self.expand[x][y]
-            if here in self.directions_name:
-                direction = self.directions_name.index(here)
-                x += self.directions[direction][0]
-                y += self.directions[direction][1]
-                self.set_color(self.xy_to_id(x, y), 64, 255, 0)            
-            count += 1
+        x = self.goal[0]
+        y = self.goal[1]
 
+        while (x,y) != (self.init[0], self.init[1]):
+            self.set_color(self.xy_to_id(x, y), 64, 255, 0)
+            local_list = self.walkthrough[x][y]
+            x = local_list[0]
+            y = local_list[1]            
+        
         self.set_color(self.xy_to_id(self.init[0], self.init[1]), 64, 255, 0)
         self.publisher.publish(self.marker_array)
         return 
@@ -155,11 +156,10 @@ class print_path():
         self.publisher.publish(self.marker_array)
 
 def main(args):
-    rospy.init_node('path_handler', anonymous=True)
+    rospy.init_node('a_star', anonymous=True)
     map = print_path()
 
-    #d = rospy.Duration(0.5, 0)
-    r = rospy.Rate(5) #Hz
+    r = rospy.Rate(1) #Hz
     while (not rospy.is_shutdown()) and (not map.is_get_goal) and (not map.no_path_to_go):
         map.iteration()
         if map.is_get_goal:
@@ -167,12 +167,11 @@ def main(args):
             map.backpropagation()
             rospy.loginfo("PRINT OUT THE PATH IN LOG")
             for i in range(len(map.expand)):
-                print map.expand[i]
+                print map.record[i]
         elif map.no_path_to_go:
             rospy.logerr("UNABLE TO FIND A PATH")
         else:
             map.draw()
-        #rospy.sleep(d)
         r.sleep()
 
 #can be used as class by import
