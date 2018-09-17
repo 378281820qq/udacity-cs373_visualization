@@ -4,6 +4,10 @@ class grid:
 		self.mode = _mode #2 mode of grid can be generate
 		self.col = _col
 		self.row = _row
+		self.heuristic = [[0 for col in range(_col)] for row in range(_row)]
+		for i in range(self.row):
+			for j in range(self.col):
+				self.heuristic[i][j] = self.row + self.col - (i + j + 2)
 		if self.mode == 'sym':
 			self.map = [[' ' for col in range(_col)] for row in range(_row)]
 		elif self.mode == 'num':
@@ -20,14 +24,20 @@ class grid:
 	def print_map(self):
 		for row in range(self.row):
 			print self.map[row]
+		print " "
+	
+	def print_heuristic(self):
+		for row in range(self.row):
+			print self.heuristic[row]
+		print " "
 
 	def __repr__(self):	
 		return repr(self.map)
 
 def main():
-	mygrid = grid(10, 8, 'sym')
-	mygrid.set_obstacle(2, 2, 4, 4)
-	mygrid.set_obstacle(0, 0, 1, 7)
+	mygrid = grid(6, 6, 'num')
+	mygrid.print_heuristic()
+	mygrid.set_obstacle(1, 1, 3, 3)
 	mygrid.print_map()
 
 if __name__ == '__main__':
