@@ -54,7 +54,7 @@ class Estimator:
             heading = atan2(measurement[1] - OTHER[0][1], measurement[0] - OTHER[0][0])
             turning = heading - self.OTHER[2]
             self.OTHER = [measurement, heading, turning, distance]
-            print self.OTHER
+            #print self.OTHER
 
             guess_robot = robot(measurement[0], measurement[1], heading, turning, distance)
             guess_robot.move(guess_robot.turning, guess_robot.distance)
@@ -69,7 +69,7 @@ class Estimator:
         estimate_pos, self.OTHER = self.estimate_next_pos(measurement, self.OTHER)
         self.update_position(estimate_pos)
         self.robot_pub.publish(self.marker_array)
-        #rospy.loginfo("Measure pos (%f, %f) Estimate pos (%f, %f)"%(msg.x, msg.y, estimate_pos[0], estimate_pos[1]))
+        rospy.loginfo("Estimate pos (%f, %f)"%(estimate_pos[0], estimate_pos[1]))
     
     def receive(self):
         rospy.Subscriber('rr_measurement', MeasurementInfo, self.meas_callback)

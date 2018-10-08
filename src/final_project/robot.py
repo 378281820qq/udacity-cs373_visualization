@@ -7,9 +7,17 @@ def angle_trunc(a):
         a += pi * 2
     return ((a + pi) % (pi * 2)) - pi
 
+def get_heading(hunter_position, target_position):
+    """Returns the angle, in radians, between the target and hunter positions"""
+    hunter_x, hunter_y = hunter_position
+    target_x, target_y = target_position
+    heading = atan2(target_y - hunter_y, target_x - hunter_x)
+    heading = angle_trunc(heading)
+    return heading
+
 class robot:
 
-    def __init__(self, x = 0.0, y = 0.0, heading = 0.0, turning = 2*pi/10, distance = 1.0):
+    def __init__(self, x = 0.0, y = 0.0, heading = 0.0, turning = 2*pi/10, distance = 1.5):
         """This function is called when you create a new robot. It sets some of 
         the attributes of the robot, either to their default values or to the values
         specified when it is created."""

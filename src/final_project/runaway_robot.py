@@ -6,8 +6,8 @@ from cs373_visualization.msg import MeasurementInfo
 from visualization_msgs.msg import Marker
 
 #-------------------------init robot, rosnode, publisher--------------------------------------#
-init_x = 2.1
-init_y = 4.3
+init_x = 0.0
+init_y = 0.0
 test_target = robot(init_x, init_y, 0.5, 2*pi/34.0, 1.5)
 test_target.set_noise(0.0, 0.0, 0.0)
 rospy.init_node('runaway_robot')
@@ -55,6 +55,6 @@ while not rospy.is_shutdown():
     meas_pub.publish(measurement_msg)
     rospy.loginfo("True position: %f, %f"%(measurement[0], measurement[1]))
     update_position(marker, measurement)    
-    robot_pub.publish(marker)
     test_target.move_in_circle()
     rate.sleep()
+    robot_pub.publish(marker)
