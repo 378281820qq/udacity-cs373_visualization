@@ -11,6 +11,7 @@ from std_msgs.msg import String
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 import numpy as np
+from grid import *
 
 class print_path():
     def __init__(self):
@@ -19,18 +20,10 @@ class print_path():
         #--------------------------------Parameter Setup-------------------------------#
         #initialize map
         self.init = [0, 0]
-        self.grid = [[0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 1],
-                    [0, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 0, 0],
-                    [0, 0, 0, 0, 0, 0]]
-        self.heuristic = [[10, 9, 8, 7, 6, 5],
-                          [9, 8, 7, 6, 5, 4],
-                          [8, 7, 6, 5, 4, 3],
-                          [7, 6, 5, 4, 3, 2],
-                          [6, 5, 4, 3, 2, 1],
-                          [5, 4, 3, 2, 1, 0]]
+        tmp_grid = grid(6, 6, 'num')
+        tmp_grid.set_obstacle(1, 1, 2, 2)
+        self.grid = tmp_grid.map
+        self.heuristic = tmp_grid.heuristic
         self.goal = [len(self.grid)-1, len(self.grid[0])-1] 
         #initialize condition
         self.count = 0
