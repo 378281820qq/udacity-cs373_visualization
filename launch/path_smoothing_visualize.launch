@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<launch>
+   <node pkg="cs373_visualization" type="path_smoothing_visualize.py" name="path_smoothing" output="screen"/>
+   <node pkg="rviz" type="rviz" name="rviz"/>
+</launch>
