@@ -45,7 +45,7 @@ class cyclic_smooth():
         rospy.loginfo("Finished INITIALIZE process")
         rospy.sleep(1)        
 
-    def iterate(self, weight_data = 0.0, weight_smooth = 0.1, tolerance = 0.12):
+    def iterate(self, weight_data = 0.1, weight_smooth = 0.1, tolerance = 0.00012):
         '''
         execute path smoothing algorithm 
         '''
@@ -59,8 +59,8 @@ class cyclic_smooth():
                     self.converge += abs(before - self.newpath[x][y])
                     self.marker_array.markers[x].pose.position.x = self.newpath[x][0]
                     self.marker_array.markers[x].pose.position.y = self.newpath[x][1]
-                    self.publisher.publish(self.marker_array)    
-            rospy.loginfo("itering, converge value: %f"%self.converge)
+                    self.publisher.publish(self.marker_array)   
+            #rospy.loginfo("itering, converge value: %f"%self.converge)
             rospy.sleep(0.05)
         self.is_converge = True
         print "Find Smoothed path"

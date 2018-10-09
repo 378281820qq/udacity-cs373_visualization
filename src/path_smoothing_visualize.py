@@ -45,7 +45,7 @@ class path_smooth():
         rospy.loginfo("Finished INITIALIZE process")
         rospy.sleep(1)        
 
-    def iterate(self, weight_data = 0.0, weight_smooth = 0.1, tolerance = 0.12):
+    def iterate(self, weight_data = 0.1, weight_smooth = 0.1, tolerance = 0.12):
         '''
         execute path smoothing algorithm 
         '''
