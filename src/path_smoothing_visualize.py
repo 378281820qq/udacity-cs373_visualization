@@ -32,6 +32,7 @@ def smooth(path, weight_data = 0.0, weight_smooth = 0.1, tolerance = 0.000001):
 
 class path_smooth():
     def __init__(self, path):
+        #--------------------------------Parameter Setup-------------------------------#
         self.publisher = rospy.Publisher('visualize_marker_array', MarkerArray, queue_size=10)
         self.marker_array = MarkerArray()
         self.path = deepcopy(path)
@@ -39,12 +40,12 @@ class path_smooth():
         self.converge = 10.0
         self.is_converge = False
         self.make_array(0, 1.0, 0, 200, 0)
-        self.make_array(len(self.path)+1, 0.3, 0, 200, 0)
+        self.make_array(len(self.path)+1, 0.3, 0, 200, 0) # record original path
         self.publisher.publish(self.marker_array)
         rospy.loginfo("Finished INITIALIZE process")
         rospy.sleep(1)        
 
-    def iterate(self, weight_data = 0.0, weight_smooth = 0.1, tolerance = 0.05):
+    def iterate(self, weight_data = 0.0, weight_smooth = 0.1, tolerance = 0.12):
         '''
         execute path smoothing algorithm 
         '''
@@ -65,6 +66,9 @@ class path_smooth():
         print "Find Smoothed path"
 
     def make_array(self, begin, a, r, g, b):
+        '''
+        helper function to draw every points in path
+        '''
         for i in range(len(self.path)):
             marker = Marker()
             marker.header.frame_id = "/world"
@@ -95,8 +99,14 @@ class path_smooth():
         self.publisher.publish(self.marker_array)
 
 def main(args):
-    path = [[0, 0],[0, 1],[0, 2],[1, 2],[2, 2],[3, 2],[4, 2],[4, 3],[4, 4]]
-    path = [[-3, -3],[-3, -2],[-3, -1],[-3, 0],[-2, 0], [-1, 0],[0, 0],[0, 1],[0, 2],[1, 2],[2, 2],[3, 2],[4, 2],[4, 3],[4, 4]]
+    #path provided by course
+    #path = [[0, 0],[0, 1],[0, 2],[1, 2],[2, 2],[3, 2],[4, 2],[4, 3],[4, 4]]
+    
+    #additional path
+    path = [[-3, -2],[-3, -1],[-3, 0],[-2, 0],[-1, 0],[0, 0],[0, 1],[0, 2],[1, 2],[2, 2],[3, 2],[4, 2],[4, 3],[4, 4]]
+    
+    #L-shape
+    #path = [[0, 0],[0, 1],[0, 2],[0, 3],[0, 4],[0, 5],[1, 5],[2, 5],[3, 5], [4, 5], [5, 5]]
     rospy.init_node('path_smoothing', anonymous=True)
     new_path_cls = path_smooth(path)
 
@@ -104,6 +114,7 @@ def main(args):
     while(not rospy.is_shutdown()) and (not new_path_cls.is_converge):
         new_path_cls.iterate()
         if new_path_cls.is_converge:
+            #show result after smoothing is done
             new_path_func = smooth(path)
             printpaths(path,new_path_func)
             new_path_cls.draw_final()
