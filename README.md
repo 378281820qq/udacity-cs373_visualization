@@ -29,6 +29,31 @@ roslaunch cs373_visualization print_path_visualize.launch
 roslaunch cs373_visualization a_star_visualize.launch
 ```
 
+### Path Smoothing
+- path_smoothing:
+```
+roslaunch cs373_visualization path_smoothing_visualize.launch
+```
+```
+roslaunch cs373_visualization smoothing.launch smooth_type:=path_smoothing
+
+```
+- cyclic_smoothing (circle path):
+```
+roslaunch cs373_visualization cyclic_smoothing_visualize.launch 
+```
+```
+roslaunch cs373_visualization smoothing.launch smooth_type:=cyclic_smoothing
+
+```
+- constrained smoothing (fixed points with given path):
+```
+roslaunch cs373_visualization constrained_smoothing_visualize.launch 
+```
+```
+roslaunch cs373_visualization smoothing.launch smooth_type:=constrained_smoothing
+
+```
 ### Runaway Robot
 There're 2 programs:
 - estimate one runaway robot

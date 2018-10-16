@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<launch>
+   <node pkg="cs373_visualization" type="constrained_smoothing_visualize.py" name="cyclic_smoothing" output="screen"/>
+   <node pkg="rviz" type="rviz" name="rviz"/>
+</launch>
