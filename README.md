@@ -14,7 +14,7 @@ This project:
 ### Environment Settings
 Ubuntu16.04 + ROS Kinetic Kame
 
-### Compile in a Local Machine
+### Compile on a Local Machine
 1. Download this repository, put it into `\src` folder of your ROS workspace
 2. `catkin_make` your workspace
 3. Source your workspace before running the code (If you've changed setting in `~\.bashrc` file, remember to open a new terminal windows)
